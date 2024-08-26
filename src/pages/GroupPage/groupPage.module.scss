@@ -1,0 +1,38 @@
+/* groupPage.module.scss */
+
+.groupPage {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	width: 100%;
+	gap: 20px;
+	padding: 20px;
+}
+
+.groupContactsContainer {
+	display: flex;
+	justify-content: center;
+	width: 100%;
+}
+
+.contactsContainer {
+	display: grid;
+	grid-template-columns: repeat(4, 1fr);
+	gap: 20px;
+	width: 100%;
+	max-width: 1200px;
+	margin-top: 20px;
+}
+
+.contactCard {
+	padding: 16px;
+	border-radius: 8px;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.781);
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+.contactCard:hover {
+	background-color: #808080;
+}

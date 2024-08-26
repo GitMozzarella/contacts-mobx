@@ -1,0 +1,69 @@
+.card {
+	width: 100%;
+	height: 100%;
+
+	display: flex;
+	gap: 20px;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	cursor: pointer;
+	font-family: 'Balsamiq Sans', sans-serif;
+	padding: 10px;
+	border-radius: 20px;
+	box-sizing: border-box;
+
+	.cardImg {
+		border-radius: 50%;
+		width: 150px;
+		height: 150px;
+		border: 2px solid black;
+		object-fit: cover;
+	}
+
+	.cardTitle {
+		font-size: 24px;
+		text-align: center;
+		cursor: default;
+		font-weight: 800;
+		margin-bottom: 10px;
+	}
+
+	.listGroup {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+		width: 100%;
+	}
+
+	.listGroupItem {
+		font-size: 16px;
+		font-weight: 600;
+		margin: 0;
+	}
+
+	.buttonsContainer {
+		display: flex;
+		justify-content: center;
+		gap: 20px;
+
+		button {
+			font-size: 24px;
+		}
+
+		.buttonUser {
+			transition: all 0.25s ease-in-out;
+			&:hover {
+				color: white;
+			}
+		}
+
+		.buttonFavorite {
+			color: rgba(190, 2, 2, 0.911);
+
+			&:hover {
+				color: white;
+			}
+		}
+	}
+}
