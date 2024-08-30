@@ -46,13 +46,7 @@ class Api {
 	}
 
 	async fetch(url: string, config?: RequestInit): Promise<globalThis.Response> {
-		return fetch(url, {
-			...config,
-			headers: {
-				...config?.headers,
-				'content-type': 'application/json'
-			}
-		})
+		return fetch(url, config)
 	}
 }
 
