@@ -42,3 +42,10 @@ export const initialFormState = {
 }
 
 export const initialFilterValues = { name: EMPTY_STRING, groupId: EMPTY_STRING }
+
+export const BASE_URL =
+	'https://fs04.gcfiles.net/fileservice/file/download/a/177331/sc'
+
+export const CONTACTS_URL = '/385/h/0afc05779dcbbebd7055a1d87b8c7c6b.json'
+
+export const GROUPS_URL = '/0/h/f1e98b0d70d16a909818b03b72415733.json'

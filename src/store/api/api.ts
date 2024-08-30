@@ -1,12 +1,11 @@
 import { ContactDto } from 'src/types/dto/ContactDto'
 import { Response, SuccessResponse, ErrorResponse } from '../../types/response'
 import { GroupContactsDto } from 'src/types/dto/GroupContactsDto'
+import { BASE_URL, CONTACTS_URL, GROUPS_URL } from 'src/constants/variables'
 
 class Api {
 	async getContacts(): Promise<Response<ContactDto[]>> {
-		const response = await this.fetch(
-			'https://fs04.gcfiles.net/fileservice/file/download/a/177331/sc/385/h/0afc05779dcbbebd7055a1d87b8c7c6b.json'
-		)
+		const response = await this.fetch(BASE_URL + CONTACTS_URL)
 
 		if (!response.ok) {
 			const errorResponse: ErrorResponse = {
@@ -25,9 +24,7 @@ class Api {
 	}
 
 	async getGroups(): Promise<Response<GroupContactsDto[]>> {
-		const response = await this.fetch(
-			'https://fs04.gcfiles.net/fileservice/file/download/a/177331/sc/0/h/f1e98b0d70d16a909818b03b72415733.json'
-		)
+		const response = await this.fetch(BASE_URL + GROUPS_URL)
 
 		if (!response.ok) {
 			const errorResponse: ErrorResponse = {
