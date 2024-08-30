@@ -15,10 +15,7 @@ import {
 } from 'src/utils/validate'
 import { initialFormState, NAME_STRING } from 'src/constants/variables'
 import { messages } from 'src/constants/messages'
-import {
-	useCreateContactMutation,
-	useEditContactMutation
-} from 'src/redux/rtkQuery/contacts'
+import { contactStore } from 'src/store/contactStore/contactStore'
 
 interface AddContactModalProps {
 	isOpen: boolean
@@ -43,9 +40,6 @@ export const AddContactModal: React.FC<AddContactModalProps> = ({
 		mode: 'onChange'
 	})
 
-	const [createContact, { isLoading: isCreating }] = useCreateContactMutation()
-	const [editContact, { isLoading: isEditing }] = useEditContactMutation()
-
 	useEffect(() => {
 		if (initialData) {
 			reset(initialData)
@@ -57,9 +51,10 @@ export const AddContactModal: React.FC<AddContactModalProps> = ({
 	const onSubmit = async (values: Omit<ContactDto, 'id'>) => {
 		try {
 			if (initialData) {
-				await editContact({ id: initialData.id, ...values })
+				contactStore.updateContact(initialData.id, values)
 			} else {
-				await createContact({ id: uuidv4(), ...values })
+				const newContact: ContactDto = { id: uuidv4(), ...values }
+				contactStore.createContact(newContact)
 			}
 			onClose()
 		} catch (err) {
@@ -88,7 +83,8 @@ export const AddContactModal: React.FC<AddContactModalProps> = ({
 			title={initialData ? messages.editContact : messages.addContact}
 			classNames={{ title: styles.modalTitle }}
 		>
-			{(isCreating || isEditing) && <Loading />}
+			{false && <Loading />}{' '}
+			{/* Здесь можно добавить логику для показа загрузки */}
 			<form onSubmit={handleSubmit(onSubmit)} className={styles.form}>
 				<TextInput
 					label='Имя'

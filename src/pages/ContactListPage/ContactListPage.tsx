@@ -1,59 +1,81 @@
-import { memo, useCallback, useMemo } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
+import { observer } from 'mobx-react-lite'
 import { ContactDto } from 'src/types/dto/ContactDto'
-import { FilterFormValues } from 'src/components/FilterForm/FilterForm'
-import { setFilterValues } from 'src/redux/slices/contactsSlice'
-import { useAppDispatch, useAppSelector } from 'src/redux/hooks'
-import { useGetContactsQuery } from 'src/redux/rtkQuery/contacts'
-import { useGetGroupsQuery } from 'src/redux/rtkQuery/groups'
-import { GroupContactsDto } from 'src/types/dto/GroupContactsDto'
-import { ContactListPageContent } from './ContactListPageContent'
+import { groupStore } from 'src/store/groupStore/groupStore'
+import {
+	FilterForm,
+	FilterFormValues
+} from 'src/components/FilterForm/FilterForm'
+import { EmptyContactsList } from 'src/components/EmptyContactsList'
+import styles from './contactListPage.module.scss'
+import { contactStore } from 'src/store/contactStore/contactStore'
+import { ContactCard } from 'src/components/ContactCard'
+import { EMPTY_STRING } from 'src/constants/variables'
 
-export const ContactListPage = memo(() => {
-	const dispatch = useAppDispatch()
-	const { data: contacts = [], isLoading: contactsLoading } =
-		useGetContactsQuery()
-	const { data: groupContacts = [], isLoading: groupContactsLoading } =
-		useGetGroupsQuery()
+export const ContactListPage = observer(() => {
+	const [filteredContacts, setFilteredContacts] = useState<ContactDto[]>([])
+	const [filterValues, setFilterValues] = useState<Partial<FilterFormValues>>({
+		name: '',
+		groupId: ''
+	})
 
-	const loading = contactsLoading || groupContactsLoading
-	const filter = useAppSelector(state => state.contacts.filter)
+	const contacts = contactStore.contactsData
+	const groups = groupStore.groupsData
 
-	const applyFilters = useCallback(
-		(
-			contacts: ContactDto[],
-			filter: Partial<FilterFormValues>,
-			groupContacts: GroupContactsDto[]
-		) => {
-			return contacts.filter(contact => {
-				const nameMatch =
-					!filter.name ||
-					contact.name.toLowerCase().includes(filter.name.toLowerCase())
-				const groupMatch =
-					!filter.groupId ||
-					groupContacts
-						.find(group => group.id === filter.groupId)
-						?.contactIds.includes(contact.id)
-				return nameMatch && groupMatch
-			})
-		},
-		[]
-	)
+	useEffect(() => {
+		contactStore.getContacts()
+		groupStore.getGroups()
+	}, [])
 
-	const filteredContacts = useMemo(
-		() => applyFilters(contacts, filter, groupContacts),
-		[contacts, filter, groupContacts, applyFilters]
-	)
+	const applyFilters = useCallback(() => {
+		let filtered = contacts
 
-	const onSubmit = (fv: Partial<FilterFormValues>) => {
-		dispatch(setFilterValues(fv))
+		const nameFilter = filterValues.name || EMPTY_STRING
+
+		if (nameFilter) {
+			filtered = filtered.filter(contact =>
+				contact.name.toLowerCase().includes(nameFilter.toLowerCase())
+			)
+		}
+
+		if (filterValues.groupId) {
+			const groupContactIds =
+				groups.find(group => group.id === filterValues.groupId)?.contactIds ||
+				[]
+
+			filtered = filtered.filter(contact =>
+				groupContactIds.includes(contact.id)
+			)
+		}
+
+		setFilteredContacts(filtered)
+	}, [contacts, filterValues, groups])
+
+	useEffect(() => {
+		applyFilters()
+	}, [applyFilters])
+
+	const handleFilterSubmit = (values: Partial<FilterFormValues>) => {
+		setFilterValues(values)
 	}
 
 	return (
-		<ContactListPageContent
-			loading={loading}
-			filteredContacts={filteredContacts}
-			filter={filter}
-			onSubmit={onSubmit}
-		/>
+		<div className={styles.contact_listPage}>
+			<div className={styles.filter_formContainer}>
+				<FilterForm
+					initialValues={filterValues}
+					onSubmit={handleFilterSubmit}
+				/>
+			</div>
+			{filteredContacts.length === 0 ? (
+				<EmptyContactsList />
+			) : (
+				<div className={styles.contact_cardsContainer}>
+					{filteredContacts.map(contact => (
+						<ContactCard key={contact.id} contact={contact} withLink />
+					))}
+				</div>
+			)}
+		</div>
 	)
 })

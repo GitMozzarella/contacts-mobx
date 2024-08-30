@@ -1,20 +1,17 @@
 import { Link } from 'react-router-dom'
-
 import { PlaceholderImage } from '../../PlaceholderImage'
+import { GroupContactsDto } from 'src/types/dto/GroupContactsDto'
 import styles from '../groupContactsCard.module.scss'
 
-export interface GroupContactsCardProps {
-	groupContactsId: string
+interface GroupContactsCardContentProps {
+	selectedGroup: GroupContactsDto
 	withLink?: boolean
 }
 
 export const GroupContactsCardContent = ({
 	selectedGroup,
 	withLink
-}: {
-	selectedGroup: any
-	withLink?: boolean
-}) => {
+}: GroupContactsCardContentProps) => {
 	const { id, name, description, photo, contactIds } = selectedGroup
 
 	return (

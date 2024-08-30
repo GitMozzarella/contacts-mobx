@@ -1,20 +1,23 @@
+import { useEffect } from 'react'
 import { FC } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { FcHome, FcPhone, FcCalendar } from 'react-icons/fc'
 import styles from './contactPage.module.scss'
-import { Loading } from 'src/components/Loading/Loading'
-import { useGetContactsQuery } from 'src/redux/rtkQuery/contacts'
 import { EmptyContactsList } from 'src/components/EmptyContactsList'
+import { contactStore } from 'src/store/contactStore/contactStore'
+import { observer } from 'mobx-react-lite'
 
-export const ContactPage: FC = () => {
+export const ContactPage: FC = observer(() => {
 	const { contactId } = useParams<{ contactId: string }>()
-	const { data: contacts, isLoading } = useGetContactsQuery()
 
-	if (isLoading) {
-		return <Loading />
-	}
+	useEffect(() => {
+		if (contactStore.contactsData.length === 0) {
+			contactStore.getContacts()
+		}
+	}, [])
 
-	const contact = contacts?.find(({ id }) => id === contactId)
+	const { contactsData } = contactStore
+	const contact = contactsData.find(({ id }) => id === contactId)
 
 	return (
 		<div className={styles.container}>
@@ -64,4 +67,4 @@ export const ContactPage: FC = () => {
 			</div>
 		</div>
 	)
-}
+})
