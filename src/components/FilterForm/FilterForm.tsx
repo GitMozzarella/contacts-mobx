@@ -1,15 +1,12 @@
-import React, { memo, useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { debounce } from 'lodash'
 import { MdPersonSearch, MdClear } from 'react-icons/md'
 import { IoPersonAdd } from 'react-icons/io5'
-import { setFilterValues } from 'src/redux/slices/contactsSlice'
+import { observer } from 'mobx-react-lite'
 import styles from './filterForm.module.scss'
-import { useAppDispatch, useAppSelector } from 'src/redux/hooks'
 import { AddContactModal } from '../AddContactModal/AddContactModal'
 import { EMPTY_STRING, initialFilterValues } from 'src/constants/variables'
-
-import { Loading } from '../Loading/Loading'
-import { useGetGroupsQuery } from 'src/redux/rtkQuery/groups'
+import { groupStore } from 'src/store/groupStore/groupStore'
 
 export interface FilterFormValues {
 	name: string
@@ -21,15 +18,13 @@ interface FilterFormProps {
 	onSubmit: (values: Partial<FilterFormValues>) => void
 }
 
-export const FilterForm = memo(
+export const FilterForm = observer(
 	({ initialValues = initialFilterValues, onSubmit }: FilterFormProps) => {
-		const dispatch = useAppDispatch()
-		const { data: groupContactsList = [], isLoading } = useGetGroupsQuery()
-		const filterValues = useAppSelector(state => state.contacts.filter)
+		const { groupsData } = groupStore
 
 		const [values, setValues] = useState<FilterFormValues>({
-			name: initialValues.name || filterValues.name || EMPTY_STRING,
-			groupId: initialValues.groupId || filterValues.groupId || EMPTY_STRING
+			name: initialValues.name || EMPTY_STRING,
+			groupId: initialValues.groupId || EMPTY_STRING
 		})
 
 		const [isModalOpen, setIsModalOpen] = useState(false)
@@ -37,7 +32,6 @@ export const FilterForm = memo(
 		useEffect(() => {
 			const debouncedSubmit = debounce((updatedValues: FilterFormValues) => {
 				onSubmit(updatedValues)
-				dispatch(setFilterValues(updatedValues))
 			}, 300)
 
 			debouncedSubmit(values)
@@ -45,7 +39,7 @@ export const FilterForm = memo(
 			return () => {
 				debouncedSubmit.cancel()
 			}
-		}, [values, dispatch, onSubmit])
+		}, [values, onSubmit])
 
 		const handleChange = (
 			e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -59,15 +53,7 @@ export const FilterForm = memo(
 
 		const handleClear = () => {
 			setValues(initialFilterValues)
-			dispatch(setFilterValues(initialFilterValues))
-		}
-
-		if (isLoading) {
-			return (
-				<div className={styles.loader}>
-					<Loading />
-				</div>
-			)
+			onSubmit(initialFilterValues)
 		}
 
 		return (
@@ -98,9 +84,9 @@ export const FilterForm = memo(
 						onChange={handleChange}
 					>
 						<option value=''>Select a group</option>
-						{groupContactsList.map(groupContacts => (
-							<option value={groupContacts.id} key={groupContacts.id}>
-								{groupContacts.name}
+						{groupsData.map(group => (
+							<option value={group.id} key={group.id}>
+								{group.name}
 							</option>
 						))}
 					</select>

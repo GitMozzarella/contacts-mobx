@@ -1,16 +1,17 @@
 import { memo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { useAppDispatch, useAppSelector } from 'src/redux/hooks'
 import { FaUserEdit } from 'react-icons/fa'
 import { MdDeleteForever, MdFavorite, MdFavoriteBorder } from 'react-icons/md'
 import { FcHome, FcPhone, FcCalendar } from 'react-icons/fc'
 import { openConfirmModal } from '@mantine/modals'
-import { toggleFavoriteContact } from 'src/redux/slices/contactsSlice'
-import { ContactDto } from 'src/types/dto/ContactDto'
-import styles from './contactCard.module.scss'
 import { notifications } from '@mantine/notifications'
 import { AddContactModal } from '../AddContactModal/AddContactModal'
 import { messages } from 'src/constants/messages'
+import { observer } from 'mobx-react-lite'
+import styles from './contactCard.module.scss'
+import { contactStore } from 'src/store/contactStore/contactStore'
+
+import { ContactDto } from 'src/types/dto/ContactDto'
 import {
 	blue,
 	green,
@@ -19,30 +20,19 @@ import {
 	red
 } from 'src/constants/variables'
 import { ErrorMessages } from 'src/constants/errorMessages'
-import {
-	useCreateContactMutation,
-	useDeleteContactMutation
-} from 'src/redux/rtkQuery/contacts'
+import { favoritesStore } from 'src/store/favoriteStore/favoriteStore'
 
 interface ContactCardProps {
 	contact: ContactDto
 	withLink?: boolean
 }
 
-export const ContactCard = memo<ContactCardProps>(({ contact, withLink }) => {
-	const dispatch = useAppDispatch()
-	const favoriteContacts = useAppSelector(
-		state => state.contacts.favoriteContacts
-	)
+const ContactCardComponent = ({ contact, withLink }: ContactCardProps) => {
 	const [isEditModalOpen, setIsEditModalOpen] = useState(false)
-
-	const isFavorite = favoriteContacts.includes(contact.id)
-	const [deleteContact] = useDeleteContactMutation()
-
-	const [createContact] = useCreateContactMutation()
+	const isFavorite = favoritesStore.isFavorite(contact.id)
 
 	const handleToggleFavorite = () => {
-		dispatch(toggleFavoriteContact(contact.id))
+		favoritesStore.toggleFavoriteContact(contact.id)
 		notifications.show({
 			title: messages.notification,
 			message: isFavorite
@@ -80,7 +70,7 @@ export const ContactCard = memo<ContactCardProps>(({ contact, withLink }) => {
 			confirmProps: { color: blue },
 			onConfirm: async () => {
 				try {
-					await deleteContact(contact.id).unwrap()
+					contactStore.deleteContact(contact.id)
 
 					notifications.show({
 						title: messages.notification,
@@ -91,7 +81,7 @@ export const ContactCard = memo<ContactCardProps>(({ contact, withLink }) => {
 				} catch (error) {
 					console.error(ErrorMessages.ErrorDeletingContact, error)
 
-					await createContact(contact)
+					contactStore.createContact(contact)
 
 					notifications.show({
 						title: messages.error,
@@ -165,4 +155,6 @@ export const ContactCard = memo<ContactCardProps>(({ contact, withLink }) => {
 			)}
 		</div>
 	)
-})
+}
+
+export const ContactCard = memo(observer(ContactCardComponent))

@@ -1,8 +1,5 @@
-import { memo } from 'react'
-import { useGetGroupsQuery } from 'src/redux/rtkQuery/groups'
-import { ErrorFetchGroups } from 'src/constants/errorMessages'
-import { Loading } from '../Loading/Loading'
-
+import { observer } from 'mobx-react-lite'
+import { groupStore } from 'src/store/groupStore/groupStore'
 import styles from './groupContactsCard.module.scss'
 import { GroupContactsCardContent } from './GroupContactsCardContent'
 
@@ -11,39 +8,15 @@ interface GroupContactsCardProps {
 	withLink?: boolean
 }
 
-export const GroupContactsCard = memo<GroupContactsCardProps>(
-	({ groupContactsId, withLink }) => {
-		const { data: groupContacts, isLoading, isError } = useGetGroupsQuery()
+export const GroupContactsCard = observer(
+	({ groupContactsId, withLink }: GroupContactsCardProps) => {
+		const { groupsData } = groupStore
 
-		if (isLoading)
-			return (
-				<div className={styles.loader}>
-					<Loading />
-				</div>
-			)
+		const selectedGroup = groupsData.find(group => group.id === groupContactsId)
 
-		if (isError)
-			return (
-				<div className={styles.error}>{ErrorFetchGroups.FailedLoadGroups}</div>
-			)
-
-		if (!groupContacts || groupContacts.length === 0)
-			return (
-				<div className={styles.noGroups}>
-					{ErrorFetchGroups.NoGroupsAvailable}
-				</div>
-			)
-
-		const selectedGroup = groupContacts.find(
-			group => group.id === groupContactsId
-		)
-
-		if (!selectedGroup)
-			return (
-				<div className={styles.groupNotFound}>
-					{ErrorFetchGroups.GroupNotFound}
-				</div>
-			)
+		if (!selectedGroup) {
+			return <div className={styles.groupNotFound}>Group not found</div>
+		}
 
 		return (
 			<GroupContactsCardContent
